@@ -122,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
       height: (_mediaQuery.size.height - appBar.preferredSize.height) * 0.7,
       child: TransactionList(_userTransactions, _deleteTransaction),
     );
-    final _pageBody = SingleChildScrollView(
+    final _pageBody = SafeArea(child: SingleChildScrollView(
       child: Column(
         children: <Widget>[
           if (_isLandscape)
@@ -144,8 +144,8 @@ class _MyHomePageState extends State<MyHomePage> {
           if (!_isLandscape)
             Container(
               height: (_mediaQuery.size.height -
-                      appBar.preferredSize.height -
-                      _mediaQuery.padding.top) *
+                  appBar.preferredSize.height -
+                  _mediaQuery.padding.top) *
                   0.3,
               child: Chart(_recentTransactions),
             ),
@@ -153,16 +153,16 @@ class _MyHomePageState extends State<MyHomePage> {
           if (_isLandscape)
             _showChart
                 ? Container(
-                    height: (_mediaQuery.size.height -
-                            appBar.preferredSize.height -
-                            _mediaQuery.padding.top) *
-                        0.7,
-                    child: Chart(_recentTransactions),
-                  )
+              height: (_mediaQuery.size.height -
+                  appBar.preferredSize.height -
+                  _mediaQuery.padding.top) *
+                  0.7,
+              child: Chart(_recentTransactions),
+            )
                 : txListWidget,
         ],
       ),
-    );
+    ),);
     return Platform.isIOS
         ? CupertinoPageScaffold(
             child: _pageBody,
