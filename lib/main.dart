@@ -95,78 +95,109 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  List<Widget> _buildLandscapeContent(
+    MediaQueryData _mediaQuery,
+    AppBar appBar,
+    Widget txListWidget,
+  ) {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text('Show Chart'),
+          Switch.adaptive(
+            activeColor: Theme.of(context).accentColor,
+            value: _showChart,
+            onChanged: (val) {
+              setState(() {
+                _showChart = val;
+              });
+            },
+          ),
+        ],
+      ),
+      _showChart
+          ? Container(
+        height: (_mediaQuery.size.height -
+            appBar.preferredSize.height -
+            _mediaQuery.padding.top) *
+            0.7,
+        child: Chart(_recentTransactions),
+      )
+          : txListWidget,
+    ];
+  }
+
+  List<Widget> _buildPortraitContent(
+    MediaQueryData _mediaQuery,
+    AppBar appBar,
+    Widget txListWidget,
+  ) {
+    return [
+      Container(
+        height: (_mediaQuery.size.height -
+                appBar.preferredSize.height -
+                _mediaQuery.padding.top) *
+            0.3,
+        child: Chart(_recentTransactions),
+      ),
+      txListWidget,
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final _mediaQuery = MediaQuery.of(context);
     final _isLandscape = _mediaQuery.orientation == Orientation.landscape;
-    final PreferredSizeWidget appBar = Platform.isIOS ? CupertinoNavigationBar(
-      middle: Text('Personal Expenses'),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          GestureDetector(
-            child: Icon(CupertinoIcons.add),
-            onTap: () => _startAddNewTransaction(context),
-          ),
-        ],
-      ),
-    ) : AppBar(
-      title: Text('Personal Expenses'),
-      actions: <Widget>[
-        IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () => _startAddNewTransaction(context)),
-      ],
-    );
+    final PreferredSizeWidget appBar = Platform.isIOS
+        ? CupertinoNavigationBar(
+            middle: Text('Personal Expenses'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                GestureDetector(
+                  child: Icon(CupertinoIcons.add),
+                  onTap: () => _startAddNewTransaction(context),
+                ),
+              ],
+            ),
+          )
+        : AppBar(
+            title: Text('Personal Expenses'),
+            actions: <Widget>[
+              IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: () => _startAddNewTransaction(context)),
+            ],
+          );
     final txListWidget = Container(
       height: (_mediaQuery.size.height - appBar.preferredSize.height) * 0.7,
       child: TransactionList(_userTransactions, _deleteTransaction),
     );
-    final _pageBody = SafeArea(child: SingleChildScrollView(
-      child: Column(
-        children: <Widget>[
-          if (_isLandscape)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text('Show Chart'),
-                Switch.adaptive(
-                  activeColor: Theme.of(context).accentColor,
-                  value: _showChart,
-                  onChanged: (val) {
-                    setState(() {
-                      _showChart = val;
-                    });
-                  },
-                ),
-              ],
-            ),
-          if (!_isLandscape)
-            Container(
-              height: (_mediaQuery.size.height -
-                  appBar.preferredSize.height -
-                  _mediaQuery.padding.top) *
-                  0.3,
-              child: Chart(_recentTransactions),
-            ),
-          if (!_isLandscape) txListWidget,
-          if (_isLandscape)
-            _showChart
-                ? Container(
-              height: (_mediaQuery.size.height -
-                  appBar.preferredSize.height -
-                  _mediaQuery.padding.top) *
-                  0.7,
-              child: Chart(_recentTransactions),
-            )
-                : txListWidget,
-        ],
+    final _pageBody = SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            if (_isLandscape)
+              ..._buildLandscapeContent(
+                _mediaQuery,
+                appBar,
+                txListWidget,
+              ),
+            if (!_isLandscape)
+              ..._buildPortraitContent(
+                _mediaQuery,
+                appBar,
+                txListWidget,
+              ),
+          ],
+        ),
       ),
-    ),);
+    );
     return Platform.isIOS
         ? CupertinoPageScaffold(
             child: _pageBody,
-        navigationBar: appBar,
+            navigationBar: appBar,
           )
         : Scaffold(
             appBar: appBar,
